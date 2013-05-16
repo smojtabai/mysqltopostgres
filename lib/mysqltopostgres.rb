@@ -26,7 +26,6 @@ class Mysql2psql
   attr_reader :options, :reader, :writer
   
   def initialize(yaml)
-    
     @options = Config.new( yaml )
     
   end
@@ -48,8 +47,13 @@ class Mysql2psql
     unless options.config['dump_file_directory'].nil?
       path = options.config['dump_file_directory']
     end
-        
-    filename = File.expand_path( File.join( path, tag + '_output.sql'))
+       
+    offset = 0
+
+    if(options["copy_options"]["offset"])
+      offset = options["copy_options"]["offset"]
+    end 
+    filename = File.expand_path( File.join( path, tag + '_output_' + offset.to_s + '.sql'))
 
     @writer = PostgresDbWriter.new(filename, options)
 

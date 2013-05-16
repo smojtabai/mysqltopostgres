@@ -15,7 +15,8 @@ class Mysql2psql
     end
     
     def inload(path = filename)
-      connection.load_file(path)    
+      output = connection.load_file(path)
+      puts output.to_s
     end
 
   end

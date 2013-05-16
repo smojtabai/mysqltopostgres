@@ -14,7 +14,7 @@ class Mysql2psql
       if options.has_key?('config') and options['config'].has_key?('destination') and options['config']['destination'].has_key?(environment)
       
         pg_options = Config.new(YAML::load(options['config']['destination'][environment].to_yaml))
-        @hostname, @login, @password, @database, @port = pg_options.host('localhost'), pg_options.username, pg_options.password, pg_options.database, pg_options.port(5432).to_s  
+        @hostname, @login, @password, @database, @port = pg_options.host(pg_options.hostname), pg_options.username, pg_options.password, pg_options.database, pg_options.port(5432).to_s  
         @database, @schema = database.split(":")
       
         @adapter = pg_options.adapter("jdbcpostgresql")
@@ -67,6 +67,11 @@ class Mysql2psql
           stream.end_copy if @is_copying
         else
           conn.put_copy_end
+          res = conn.get_result
+          status_code = res.result_status
+          if status_code != 1
+            raise "#{status_code}, #{res.res_status(status_code)}, #{res.result_error_message}"
+          end
         end
       rescue Exception => e
         $stderr.puts e
@@ -126,12 +131,11 @@ class Mysql2psql
             else
             
               begin
-              
+                #puts conn.put_copy_data(sql).to_s 
                 until conn.put_copy_data( sql )
                   $stderr.puts "  waiting for connection to be writable..."
                   sleep 0.1
                 end
-              
               rescue Exception => e
                 @is_copying = false
                 $stderr.puts e
@@ -156,6 +160,9 @@ class Mysql2psql
 
     # given a file containing psql syntax at path, pipe it down to the database.
     def load_file(path)
+      #path
+      #pg_options.host(pg_options.hostname), pg_options.username, pg_options.password, pg_options.database, pg_options.port(5432).to_s
+      #exec 'echo "psql -h #{@hostname} -U #{@username}"'
       if @conn
         File.open(path, 'r:UTF-8') do |file|
           file.each_line do |line|
