@@ -5,7 +5,6 @@ class Mysql2psql
   class Config < ConfigBase
     
     def initialize(yaml)
-      
       super(yaml)
       
     end
