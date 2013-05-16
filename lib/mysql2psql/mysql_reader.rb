@@ -179,8 +179,9 @@ class Mysql2psql
     end
   
     def initialize(options)
+      @copy_options = options["copy_options"]
       @host, @user, @passwd, @db, @port, @sock, @flag = 
-        options.mysqlhost('localhost'), options.mysqlusername, 
+        options.mysqlhost(options.mysqlhostname), options.mysqlusername, 
         options.mysqlpassword, options.mysqldatabase, 
         options.mysqlport, options.mysqlsocket
       @port = 3306 if @port == ""  # for things like Amazon's RDS you don't have a port and connect fails with "" for a value
@@ -194,19 +195,53 @@ class Mysql2psql
     def tables
       @tables ||= @mysql.list_tables.map {|table| Table.new(self, table)}
     end
+
+    def get_id_for_offset(offset, table)
+      statement = @mysql.prepare("select id from #{table.name} ORDER BY id LIMIT 1 OFFSET #{offset}")
+      statement.execute
+      row = statement.fetch
+      row[0]
+    end
   
     def paginated_read(table, page_size)
       count = table.count_for_pager
+      puts "offset: " + @copy_options["offset"].to_s
+      puts "limit: " + @copy_options["limit"].to_s
+      if(@copy_options["start_id"])
+        start_id = @copy_options["start_id"]
+        end_id = @copy_options["end_id"]
+      elsif(@copy_options["offset"])
+        start_id = get_id_for_offset(@copy_options["offset"] * @copy_options["limit"], table)
+        end_id = get_id_for_offset((@copy_options["offset"] + 1) * @copy_options["limit"], table)
+      else
+        start_id = 0
+        end_id = count
+      end
+
+      if(@copy_options["offset"])
+        count = [(end_id - start_id), count + 1].min
+      end
       return if count < 1
       statement = @mysql.prepare(table.query_for_pager)
       counter = 0
-      0.upto((count + page_size)/page_size) do |i|
-        statement.execute(i*page_size, table.has_id? ? (i+1)*page_size : page_size)
+      start_id = (start_id || 0)
+      puts "count: " + count.to_s
+      puts "start_id: " + start_id.to_s
+      puts "end_id: " + end_id.to_s
+      puts "upto: " + ((count + page_size)/page_size).to_s
+      
+      0.upto((count)/page_size) do |i|
+        last_id = [(end_id), start_id + (table.has_id? ? (i+1)*page_size : page_size) ].min
+        statement.execute(start_id + i*page_size, last_id)
+        #puts "query: " + table.query_for_pager.to_s
+        puts "first arg: " + (start_id + i*page_size).to_s
+        puts "second arg: " + last_id.to_s
         while row = statement.fetch
           counter += 1
           yield(row, counter)
         end
       end
+      puts "counter: " + counter.to_s
       counter
     end
   end
