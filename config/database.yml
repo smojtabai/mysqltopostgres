@@ -1,0 +1,33 @@
+mysql2psql:
+  mysql:
+    hostname: malibu-to-postgres.c6csxumefeuy.us-east-1.rds.amazonaws.com
+    port: 3306
+    username: malibu
+    password: kpGj6w1p5f663a46X7Mfo5jCF2S20o
+    database: malibuproduction
+
+  destination:
+    development:
+      hostname: ec2-54-243-220-243.compute-1.amazonaws.com
+      username: u22939lv19a891
+      port: 5432
+      database: dcp331bjibht8s
+      password: pc4h1u48adfoer9rj80v2khs65b
+
+  tables:
+    - campaign_creatives
+  
+  # if suppress_data is true, only the schema definition will be exported/migrated, and not the data
+  suppress_data: false
+
+  # if suppress_ddl is true, only the data will be exported/imported, and not the schema
+  suppress_ddl: true
+
+  # if force_truncate is true, forces a table truncate before table loading
+  force_truncate: false
+
+  preserve_order: true
+
+  remove_dump_file: false
+
+  report_status:  json    # false, json, xml
