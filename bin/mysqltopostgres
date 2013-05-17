@@ -5,7 +5,7 @@ require 'rubygems'
 require 'bundler/setup'
 
 require 'mysqltopostgres'
-
+start_time = Time.now
 CONFIG_FILE = File.expand_path(File.expand_path(File.dirname(__FILE__)) + "/../config/database.yml")
 if FileTest.exist?(CONFIG_FILE) or (ARGV.length > 0 and FileTest.exist?(File.expand_path(ARGV[0])))
   file = CONFIG_FILE
@@ -31,3 +31,4 @@ if FileTest.exist?(CONFIG_FILE) or (ARGV.length > 0 and FileTest.exist?(File.exp
 else
   raise "'#{file}' does not exist"
 end
+puts "running time: " + (Time.now - start_time).to_s

@@ -15,7 +15,7 @@ mysql2psql:
       password: pc4h1u48adfoer9rj80v2khs65b
 
   tables:
-    - campaign_creatives
+    - campaign_creatives_geolocations
   
   # if suppress_data is true, only the schema definition will be exported/migrated, and not the data
   suppress_data: false

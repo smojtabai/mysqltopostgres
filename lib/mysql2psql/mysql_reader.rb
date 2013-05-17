@@ -200,7 +200,11 @@ class Mysql2psql
       statement = @mysql.prepare("select id from #{table.name} ORDER BY id LIMIT 1 OFFSET #{offset}")
       statement.execute
       row = statement.fetch
-      row[0]
+      if(row) 
+        return row[0]
+      else
+        return nil
+      end
     end
   
     def paginated_read(table, page_size)
@@ -215,12 +219,12 @@ class Mysql2psql
         end_id = get_id_for_offset((@copy_options["offset"] + 1) * @copy_options["limit"], table)
       else
         start_id = 0
-        end_id = count
+        end_id = count + 1
       end
-
-      if(@copy_options["offset"])
-        count = [(end_id - start_id), count + 1].min
-      end
+      return if start_id == nil
+      end_id = count + 1 if end_id == nil
+      count = [(end_id - start_id), count].min
+      
       return if count < 1
       statement = @mysql.prepare(table.query_for_pager)
       counter = 0
