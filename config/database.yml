@@ -1,6 +1,6 @@
 mysql2psql:
   mysql:
-    hostname: malibu-to-postgres.c6csxumefeuy.us-east-1.rds.amazonaws.com
+    hostname: read-to-postgres.c6csxumefeuy.us-east-1.rds.amazonaws.com
     port: 3306
     username: malibu
     password: kpGj6w1p5f663a46X7Mfo5jCF2S20o
@@ -8,11 +8,11 @@ mysql2psql:
 
   destination:
     development:
-      hostname: ec2-54-243-220-243.compute-1.amazonaws.com
-      username: u22939lv19a891
+      hostname: ec2-107-21-240-217.compute-1.amazonaws.com
+      username: u36hca8urj643o
       port: 5432
-      database: dcp331bjibht8s
-      password: pc4h1u48adfoer9rj80v2khs65b
+      database: dc2vsnpusje1p9
+      password: p7d36o6jrhi237cl40fbbrftmnc
 
   tables:
     - campaign_creatives_geolocations
